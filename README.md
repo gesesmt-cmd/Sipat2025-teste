@@ -1,1 +1,0 @@
-# Sipat2025-teste

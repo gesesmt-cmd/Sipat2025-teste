@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ranking SIPAT 2025</title>
+  <title>Teste 09.58</title>
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -387,21 +387,25 @@
             };
           })
           .filter(player => player !== null && player.nome && player.nome !== "Nome não informado")
-          .sort((a, b) => {
-            // ✅ Ordenar por pontos (decrescente) e depois por tempo (crescente)
-            if (b.pontos !== a.pontos) {
-              return b.pontos - a.pontos;
-            }
-            // Se os pontos são iguais, ordenar por tempo (menor tempo primeiro)
-            if (a.tempo && b.tempo && a.tempo !== "00:00" && b.tempo !== "00:00") {
-              return a.tempo.localeCompare(b.tempo);
-            }
-            return 0;
-          })
-          .map((player, index) => ({
-            ...player,
-            posicao: index + 1 // Reindexar posições após ordenação
-          }));
+        
+        console.log("Players coletados:", players); // Debug
+        
+        // ✅ Ordenar por pontos (decrescente) e depois por tempo (crescente)
+        players.sort((a, b) => {
+          if (b.pontos !== a.pontos) {
+            return b.pontos - a.pontos;
+          }
+          // Se os pontos são iguais, ordenar por tempo (menor tempo primeiro)
+          if (a.tempo && b.tempo && a.tempo !== "00:00" && b.tempo !== "00:00") {
+            return a.tempo.localeCompare(b.tempo);
+          }
+          return 0;
+        });
+        
+        // Reindexar posições após ordenação
+        players.forEach((player, index) => {
+          player.posicao = index + 1;
+        });
 
         console.log("Players processados e ordenados:", players); // Debug
 

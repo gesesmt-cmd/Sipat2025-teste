@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>09.39</title>
+  <title>teste 09.42</title>
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -296,6 +296,7 @@
   </style>
 </head>
 <body>
+  <div id="header"></div>
   <div class="container">
     <h1>🏆 Ranking SIPAT 2025</h1>
     <div class="subtitle">Classificação Geral dos Jogadores</div>
@@ -335,6 +336,12 @@
     const SHEET_NAME = "Consolidado";
     const JSON_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${SHEET_NAME}`;
 
+    // Importar header
+    fetch("/header.html")
+      .then(r => r.text())
+      .then(data => { document.getElementById("header").innerHTML = data; })
+      .catch(() => console.log("Header não encontrado."));
+
     async function loadRankingData() {
       document.getElementById("loading").style.display = "block";
       document.getElementById("error").style.display = "none";
@@ -342,49 +349,81 @@
       document.getElementById("ranking-table").style.display = "none";
       document.getElementById("stats").style.display = "none";
       document.getElementById("last-update").style.display = "none";
-    
+
       try {
         const response = await fetch(JSON_URL);
         const text = await response.text();
-    
+
         // Limpar o "lixo" que o Google retorna
         const json = JSON.parse(text.substring(47, text.length - 2));
         const rows = json.table.rows;
-    
+
         if (!rows || rows.length < 2) {
           throw new Error("Nenhum dado encontrado na planilha");
         }
-    
-        // ✅ Agora não u
-    
-    
-        function createStats(players) {
-          const stats = document.getElementById("stats");
-          const totalPlayers = players.length;
-          const totalPoints = players.reduce((sum, p) => sum + p.pontos, 0);
-          const avgPoints = totalPlayers > 0 ? Math.round(totalPoints / totalPlayers) : 0;
-          const maxPoints = players.length > 0 ? Math.max(...players.map(p => p.pontos)) : 0;
-    
-          stats.innerHTML = `
-            <div class="stat-card">
-              <div class="stat-number">${totalPlayers}</div>
-              <div class="stat-label">Jogadores</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-number">${totalPoints.toLocaleString()}</div>
-              <div class="stat-label">Total de Pontos</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-number">${avgPoints}</div>
-              <div class="stat-label">Média de Pontos</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-number">${maxPoints}</div>
-              <div class="stat-label">Maior Pontuação</div>
-            </div>
-          `;
-          stats.style.display = "flex";
-        }
+
+        // ⚠️ CORREÇÃO: Mapear corretamente as colunas da planilha "Consolidado"
+        // Baseado na sua função: ["Posição", "Nome", "CPF", "Pontos", "Melhor Tempo"]
+        const players = rows.slice(1)
+          .map((row, index) => {
+            // Debug para verificar a estrutura dos dados
+            console.log(`Row ${index}:`, row);
+            
+            return {
+              posicao: row.c && row.c[0] ? row.c[0].v : (index + 1),
+              nome: row.c && row.c[1] ? row.c[1].v : "Nome não informado",
+              cpf: row.c && row.c[2] ? row.c[2].v : "CPF não informado", 
+              pontos: row.c && row.c[3] ? parseInt(row.c[3].v) || 0 : 0,
+              tempo: row.c && row.c[4] ? (row.c[4].f || row.c[4].v || "-") : "-"
+            };
+          })
+          .filter(player => player.nome && player.nome !== "Nome não informado");
+
+        console.log("Players processados:", players); // Debug
+
+        // ✅ Os dados já vêm ordenados da planilha (sua função faz o ranking)
+        // Não precisa reordenar aqui
+
+        createStats(players);
+        createPodium(players);
+        createRankingTable(players);
+        updateLastUpdate();
+
+        document.getElementById("loading").style.display = "none";
+        
+      } catch (err) {
+        console.error("Erro detalhado:", err);
+        showError(`Erro ao carregar dados: ${err.message}`);
+      }
+    }
+
+    function createStats(players) {
+      const stats = document.getElementById("stats");
+      const totalPlayers = players.length;
+      const totalPoints = players.reduce((sum, p) => sum + p.pontos, 0);
+      const avgPoints = totalPlayers > 0 ? Math.round(totalPoints / totalPlayers) : 0;
+      const maxPoints = players.length > 0 ? Math.max(...players.map(p => p.pontos)) : 0;
+
+      stats.innerHTML = `
+        <div class="stat-card">
+          <div class="stat-number">${totalPlayers}</div>
+          <div class="stat-label">Jogadores</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">${totalPoints.toLocaleString()}</div>
+          <div class="stat-label">Total de Pontos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">${avgPoints}</div>
+          <div class="stat-label">Média de Pontos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">${maxPoints}</div>
+          <div class="stat-label">Maior Pontuação</div>
+        </div>
+      `;
+      stats.style.display = "flex";
+    }
 
     function createPodium(players) {
       const podium = document.getElementById("podium");

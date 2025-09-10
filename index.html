@@ -321,7 +321,6 @@
           <th>👤 Nome</th>
           <th>📋 CPF</th>
           <th>⭐ Pontos</th>
-          <th>⏱️ Melhor Tempo</th>
         </tr>
       </thead>
       <tbody id="ranking-body"></tbody>
@@ -469,7 +468,6 @@
           <div class="position-number">${medals[index]} ${player.posicao}º</div>
           <div class="player-name">${player.nome}</div>
           <div class="player-points">${player.pontos.toLocaleString()} pontos</div>
-          <div class="player-time">Tempo: ${player.tempo}</div>
         `;
         podium.appendChild(div);
       });

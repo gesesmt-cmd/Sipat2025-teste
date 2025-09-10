@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>teste 09.42</title>
+  <title>teste 09.51</title>
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -335,13 +335,7 @@
     const SHEET_NAME = "Consolidado";
     const JSON_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${SHEET_NAME}`;
 
-    // Importar header
-    fetch("/header.html")
-      .then(r => r.text())
-      .then(data => { document.getElementById("header").innerHTML = data; })
-      .catch(() => console.log("Header não encontrado."));
-
-    async function loadRankingData() {
+      async function loadRankingData() {
       document.getElementById("loading").style.display = "block";
       document.getElementById("error").style.display = "none";
       document.getElementById("podium").style.display = "none";
@@ -361,27 +355,50 @@
           throw new Error("Nenhum dado encontrado na planilha");
         }
 
-        // ⚠️ CORREÇÃO: Mapear corretamente as colunas da planilha "Consolidado"
-        // Baseado na sua função: ["Posição", "Nome", "CPF", "Pontos", "Melhor Tempo"]
-        const players = rows.slice(1)
+        // ✅ CORREÇÃO: Mapear corretamente as colunas conforme a estrutura da planilha
+        // Estrutura: ["Posição", "Nome", "CPF", "Pontos", "Melhor Tempo"] (índices 0,1,2,3,4)
+        const players = rows.slice(1) // Pular header
           .map((row, index) => {
-            // Debug para verificar a estrutura dos dados
-            console.log(`Row ${index}:`, row);
+            // Verificar se a linha tem dados válidos
+            if (!row.c || row.c.length < 4) return null;
+            
+            // ✅ Mapear corretamente cada coluna
+            const posicao = row.c[0] ? (row.c[0].v || (index + 1)) : (index + 1);
+            const nome = row.c[1] ? (row.c[1].v || "Nome não informado") : "Nome não informado";
+            const cpf = row.c[2] ? (row.c[2].v || "CPF não informado") : "CPF não informado";
+            const pontos = row.c[3] ? (parseInt(row.c[3].v) || 0) : 0;
+            const tempo = row.c[4] ? (row.c[4].f || row.c[4].v || "00:00") : "00:00";
             
             return {
-              posicao: row.c && row.c[0] ? row.c[0].v : (index + 1),
-              nome: row.c && row.c[1] ? row.c[1].v : "Nome não informado",
-              cpf: row.c && row.c[2] ? row.c[2].v : "CPF não informado", 
-              pontos: row.c && row.c[3] ? parseInt(row.c[3].v) || 0 : 0,
-              tempo: row.c && row.c[4] ? (row.c[4].f || row.c[4].v || "-") : "-"
+              posicao: posicao,
+              nome: nome,
+              cpf: cpf,
+              pontos: pontos,
+              tempo: tempo
             };
           })
-          .filter(player => player.nome && player.nome !== "Nome não informado");
+          .filter(player => player !== null && player.nome && player.nome !== "Nome não informado")
+          .sort((a, b) => {
+            // ✅ Ordenar por pontos (decrescente) e depois por tempo (crescente)
+            if (b.pontos !== a.pontos) {
+              return b.pontos - a.pontos;
+            }
+            // Se os pontos são iguais, ordenar por tempo (menor tempo primeiro)
+            if (a.tempo && b.tempo && a.tempo !== "00:00" && b.tempo !== "00:00") {
+              return a.tempo.localeCompare(b.tempo);
+            }
+            return 0;
+          })
+          .map((player, index) => ({
+            ...player,
+            posicao: index + 1 // Reindexar posições após ordenação
+          }));
 
-        console.log("Players processados:", players); // Debug
+        console.log("Players processados e ordenados:", players); // Debug
 
-        // ✅ Os dados já vêm ordenados da planilha (sua função faz o ranking)
-        // Não precisa reordenar aqui
+        if (players.length === 0) {
+          throw new Error("Nenhum jogador válido encontrado nos dados");
+        }
 
         createStats(players);
         createPodium(players);

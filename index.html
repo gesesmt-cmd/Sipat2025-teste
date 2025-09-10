@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>teste 09.51</title>
+  <title>Ranking SIPAT 2025</title>
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -335,7 +335,13 @@
     const SHEET_NAME = "Consolidado";
     const JSON_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${SHEET_NAME}`;
 
-      async function loadRankingData() {
+    // Importar header
+    fetch("/header.html")
+      .then(r => r.text())
+      .then(data => { document.getElementById("header").innerHTML = data; })
+      .catch(() => console.log("Header não encontrado."));
+
+    async function loadRankingData() {
       document.getElementById("loading").style.display = "block";
       document.getElementById("error").style.display = "none";
       document.getElementById("podium").style.display = "none";
@@ -354,6 +360,9 @@
         if (!rows || rows.length < 2) {
           throw new Error("Nenhum dado encontrado na planilha");
         }
+
+        console.log("Dados brutos da planilha:", rows); // Debug
+        console.log("Total de linhas (incluindo header):", rows.length); // Debug
 
         // ✅ CORREÇÃO: Mapear corretamente as colunas conforme a estrutura da planilha
         // Estrutura: ["Posição", "Nome", "CPF", "Pontos", "Melhor Tempo"] (índices 0,1,2,3,4)

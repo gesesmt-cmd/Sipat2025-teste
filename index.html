@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>09.38</title>
+  <title>09.39</title>
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -386,35 +386,30 @@
           stats.style.display = "flex";
         }
 
-      function createPodium(players) {
-        const podium = document.getElementById("podium");
-        podium.innerHTML = "";
+    function createPodium(players) {
+      const podium = document.getElementById("podium");
+      podium.innerHTML = "";
+      const top3 = players.slice(0, 3);
       
-        // Garantir que existam pelo menos 3 (ou menos, se não tiver)
-        const top3 = players.slice(0, 3);
+      const positions = ["first", "second", "third"];
+      const medals = ["🥇", "🥈", "🥉"];
       
-        // Ordenar manualmente: 2º, 1º, 3º -> para o 1º ficar no centro
-        const ordered = [top3[1], top3[0], top3[2]].filter(Boolean);
+      top3.forEach((player, index) => {
+        const div = document.createElement("div");
+        div.className = `podium-place ${positions[index]}`;
+        div.innerHTML = `
+          <div class="position-number">${medals[index]} ${player.posicao}º</div>
+          <div class="player-name">${player.nome}</div>
+          <div class="player-points">${player.pontos.toLocaleString()} pontos</div>
+          <div class="player-time">Tempo: ${player.tempo}</div>
+        `;
+        podium.appendChild(div);
+      });
       
-        const positions = ["second", "first", "third"];
-        const medals = ["🥈", "🥇", "🥉"];
-      
-        ordered.forEach((player, index) => {
-          const div = document.createElement("div");
-          div.className = `podium-place ${positions[index]}`;
-          div.innerHTML = `
-            <div class="position-number">${medals[index]} ${player.posicao}º</div>
-            <div class="player-name">${player.nome}</div>
-            <div class="player-points">${player.pontos.toLocaleString()} pontos</div>
-            <div class="player-time">Tempo: ${player.tempo}</div>
-          `;
-          podium.appendChild(div);
-        });
-      
-        if (top3.length > 0) {
-          podium.style.display = "flex";
-        }
+      if (top3.length > 0) {
+        podium.style.display = "flex";
       }
+    }
 
     function createRankingTable(players) {
       const tbody = document.getElementById("ranking-body");

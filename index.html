@@ -1,1 +1,505 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ranking SIPAT 2025</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      margin: 0;
+      padding: 0;
+      padding-top: 80px;
+      min-height: 100vh;
+    }
+    
+    #header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      display: flex;
+      justify-content: center;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(10px);
+      padding: 15px 0;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+    }
+    
+    #header > * {
+      width: calc(100% - 40px);
+      max-width: 1200px;
+      margin: 0 auto;
+      box-sizing: border-box;
+    }
+    
+    .container {
+      max-width: 1000px;
+      margin: 30px auto;
+      background: rgba(255,255,255,0.95);
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      backdrop-filter: blur(10px);
+    }
+    
+    h1 {
+      text-align: center;
+      color: #333;
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 1.1em;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+      font-size: 1.1em;
+    }
+    
+    .loading:before {
+      content: "";
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #667eea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-right: 10px;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .error {
+      text-align: center;
+      padding: 20px;
+      color: #d32f2f;
+      background-color: #ffebee;
+      border-radius: 10px;
+      margin: 20px 0;
+      border-left: 4px solid #d32f2f;
+    }
+    
+    .podium {
+      display: flex;
+      justify-content: center;
+      align-items: end;
+      margin: 40px 0;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    
+    .podium-place {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 25px;
+      border-radius: 15px;
+      text-align: center;
+      min-width: 140px;
+      position: relative;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      transition: transform 0.3s ease;
+    }
+    
+    .podium-place:hover {
+      transform: translateY(-5px);
+    }
+    
+    .podium-place.first {
+      background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+      color: #333;
+      height: 140px;
+      order: 2;
+      transform: scale(1.1);
+    }
+    
+    .podium-place.second {
+      background: linear-gradient(135deg, #c0c0c0 0%, #e8e8e8 100%);
+      color: #333;
+      height: 120px;
+      order: 1;
+    }
+    
+    .podium-place.third {
+      background: linear-gradient(135deg, #cd7f32 0%, #deb887 100%);
+      color: #333;
+      height: 100px;
+      order: 3;
+    }
+    
+    .position-number {
+      font-size: 28px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    
+    .player-name {
+      font-size: 16px;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+    
+    .player-points {
+      font-size: 14px;
+      opacity: 0.9;
+      margin-bottom: 5px;
+    }
+    
+    .player-time {
+      font-size: 12px;
+      opacity: 0.8;
+    }
+    
+    .refresh-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 25px;
+      cursor: pointer;
+      margin: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+    }
+    
+    .refresh-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 30px;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    th {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 15px 10px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    
+    td {
+      padding: 12px 10px;
+      text-align: center;
+      border-bottom: 1px solid #eee;
+      font-size: 14px;
+    }
+    
+    tr:nth-child(even) {
+      background-color: rgba(102, 126, 234, 0.05);
+    }
+    
+    tr:hover {
+      background-color: rgba(102, 126, 234, 0.1);
+      transition: background-color 0.3s ease;
+    }
+    
+    .position-cell {
+      font-weight: bold;
+      color: #667eea;
+      font-size: 16px;
+    }
+    
+    .points-cell {
+      font-weight: bold;
+      color: #333;
+      font-size: 16px;
+    }
+    
+    .stats {
+      display: flex;
+      justify-content: space-around;
+      margin: 30px 0;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    
+    .stat-card {
+      background: rgba(255,255,255,0.8);
+      padding: 20px;
+      border-radius: 15px;
+      text-align: center;
+      min-width: 150px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .stat-number {
+      font-size: 2em;
+      font-weight: bold;
+      color: #667eea;
+      margin-bottom: 5px;
+    }
+    
+    .stat-label {
+      color: #666;
+      font-size: 0.9em;
+    }
+    
+    .last-update {
+      text-align: center;
+      color: #666;
+      font-size: 0.9em;
+      margin-top: 20px;
+      padding: 10px;
+      background: rgba(102, 126, 234, 0.05);
+      border-radius: 10px;
+    }
+    
+    @media (max-width: 768px) {
+      .container {
+        margin: 20px 10px;
+        padding: 20px;
+      }
+      
+      .podium {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .podium-place {
+        order: unset !important;
+        transform: none !important;
+        margin-bottom: 10px;
+      }
+      
+      h1 {
+        font-size: 2em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="header"></div>
+  <div class="container">
+    <h1>🏆 Ranking SIPAT 2025</h1>
+    <div class="subtitle">Classificação Geral dos Jogadores</div>
+    
+    <div style="text-align: center; margin: 20px 0;">
+      <button class="refresh-btn" onclick="loadRankingData()">🔄 Atualizar Ranking</button>
+    </div>
+    
+    <div id="loading" class="loading" style="display: none;">
+      Carregando dados da planilha...
+    </div>
+    
+    <div id="error" class="error" style="display: none;"></div>
+    
+    <div id="stats" class="stats" style="display: none;"></div>
+    
+    <div id="podium" class="podium" style="display: none;"></div>
+    
+    <table id="ranking-table" style="display: none;">
+      <thead>
+        <tr>
+          <th>🏅 Posição</th>
+          <th>👤 Nome</th>
+          <th>📋 CPF</th>
+          <th>⭐ Pontos</th>
+          <th>⏱️ Melhor Tempo</th>
+        </tr>
+      </thead>
+      <tbody id="ranking-body"></tbody>
+    </table>
+    
+    <div id="last-update" class="last-update" style="display: none;"></div>
+  </div>
 
+  <script>
+    const SHEET_ID = "1vdsvbUJe8Bz8PAzgEdZUNc6PieLLSOB8D-khKJa8kOo";
+    const SHEET_NAME = "Consolidado";
+    const JSON_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${SHEET_NAME}`;
+
+    // Importar header
+    fetch("/header.html")
+      .then(r => r.text())
+      .then(data => { document.getElementById("header").innerHTML = data; })
+      .catch(() => console.log("Header não encontrado."));
+
+    async function loadRankingData() {
+      document.getElementById("loading").style.display = "block";
+      document.getElementById("error").style.display = "none";
+      document.getElementById("podium").style.display = "none";
+      document.getElementById("ranking-table").style.display = "none";
+      document.getElementById("stats").style.display = "none";
+      document.getElementById("last-update").style.display = "none";
+
+      try {
+        const response = await fetch(JSON_URL);
+        const text = await response.text();
+
+        // Limpar o "lixo" que o Google retorna
+        const json = JSON.parse(text.substring(47, text.length - 2));
+        const rows = json.table.rows;
+
+        if (!rows || rows.length < 2) {
+          throw new Error("Nenhum dado encontrado na planilha");
+        }
+
+        // ⚠️ CORREÇÃO: Mapear corretamente as colunas da planilha "Consolidado"
+        // Baseado na sua função: ["Posição", "Nome", "CPF", "Pontos", "Melhor Tempo"]
+        const players = rows.slice(1)
+          .map(row => ({
+            posicao: row.c[0] ? row.c[0].v : 0,
+            nome: row.c[1] ? row.c[1].v : "Nome não informado",
+            cpf: row.c[2] ? row.c[2].v : "CPF não informado", 
+            pontos: row.c[3] ? parseInt(row.c[3].v) || 0 : 0,
+            tempo: row.c[4] ? row.c[4].f || row.c[4].v || "-" : "-"
+          }))
+          .filter(player => player.nome && player.nome !== "Nome não informado");
+
+        // ✅ Os dados já vêm ordenados da planilha (sua função faz o ranking)
+        // Não precisa reordenar aqui
+
+        createStats(players);
+        createPodium(players);
+        createRankingTable(players);
+        updateLastUpdate();
+
+        document.getElementById("loading").style.display = "none";
+        
+      } catch (err) {
+        console.error("Erro detalhado:", err);
+        showError(`Erro ao carregar dados: ${err.message}`);
+      }
+    }
+
+    function createStats(players) {
+      const stats = document.getElementById("stats");
+      const totalPlayers = players.length;
+      const totalPoints = players.reduce((sum, p) => sum + p.pontos, 0);
+      const avgPoints = totalPlayers > 0 ? Math.round(totalPoints / totalPlayers) : 0;
+      const maxPoints = players.length > 0 ? Math.max(...players.map(p => p.pontos)) : 0;
+
+      stats.innerHTML = `
+        <div class="stat-card">
+          <div class="stat-number">${totalPlayers}</div>
+          <div class="stat-label">Jogadores</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">${totalPoints.toLocaleString()}</div>
+          <div class="stat-label">Total de Pontos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">${avgPoints}</div>
+          <div class="stat-label">Média de Pontos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">${maxPoints}</div>
+          <div class="stat-label">Maior Pontuação</div>
+        </div>
+      `;
+      stats.style.display = "flex";
+    }
+
+    function createPodium(players) {
+      const podium = document.getElementById("podium");
+      podium.innerHTML = "";
+      const top3 = players.slice(0, 3);
+      
+      const positions = ["first", "second", "third"];
+      const medals = ["🥇", "🥈", "🥉"];
+      
+      top3.forEach((player, index) => {
+        const div = document.createElement("div");
+        div.className = `podium-place ${positions[index]}`;
+        div.innerHTML = `
+          <div class="position-number">${medals[index]} ${player.posicao}º</div>
+          <div class="player-name">${player.nome}</div>
+          <div class="player-points">${player.pontos.toLocaleString()} pontos</div>
+          <div class="player-time">Tempo: ${player.tempo}</div>
+        `;
+        podium.appendChild(div);
+      });
+      
+      if (top3.length > 0) {
+        podium.style.display = "flex";
+      }
+    }
+
+    function createRankingTable(players) {
+      const tbody = document.getElementById("ranking-body");
+      tbody.innerHTML = "";
+      
+      players.forEach((player) => {
+        const row = document.createElement("tr");
+        
+        // Adicionar classe especial para o top 3
+        if (player.posicao <= 3) {
+          row.style.background = "linear-gradient(90deg, rgba(255,215,0,0.1) 0%, rgba(255,255,255,0.1) 100%)";
+        }
+        
+        row.innerHTML = `
+          <td class="position-cell">${player.posicao}º</td>
+          <td style="text-align: left; font-weight: 500;">${player.nome}</td>
+          <td style="font-family: monospace;">${player.cpf}</td>
+          <td class="points-cell">${player.pontos.toLocaleString()}</td>
+          <td style="font-family: monospace;">${player.tempo}</td>
+        `;
+        tbody.appendChild(row);
+      });
+      
+      if (players.length > 0) {
+        document.getElementById("ranking-table").style.display = "table";
+      }
+    }
+
+    function updateLastUpdate() {
+      const now = new Date();
+      const formatted = now.toLocaleString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit', 
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      
+      document.getElementById("last-update").innerHTML = `
+        📅 Última atualização: ${formatted}
+      `;
+      document.getElementById("last-update").style.display = "block";
+    }
+
+    function showError(msg) {
+      document.getElementById("error").innerHTML = `
+        ❌ ${msg}
+        <br><small>Verifique se a planilha está acessível e se os dados estão corretos.</small>
+      `;
+      document.getElementById("error").style.display = "block";
+      document.getElementById("loading").style.display = "none";
+    }
+
+    // Carregar automaticamente ao abrir a página
+    document.addEventListener("DOMContentLoaded", loadRankingData);
+    
+    // Auto-refresh a cada 5 minutos
+    setInterval(loadRankingData, 5 * 60 * 1000);
+  </script>
+</body>
+</html>

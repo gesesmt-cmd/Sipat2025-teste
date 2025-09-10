@@ -366,7 +366,7 @@
 
         // ✅ CORREÇÃO: Mapear corretamente as colunas conforme a estrutura da planilha
         // Estrutura: ["Posição", "Nome", "CPF", "Pontos", "Melhor Tempo"] (índices 0,1,2,3,4)
-        const players = rows.slice(1) // Pular header
+        const players = rows.slice(0) // Pular header
           .map((row, index) => {
             // Verificar se a linha tem dados válidos
             if (!row.c || row.c.length < 4) return null;

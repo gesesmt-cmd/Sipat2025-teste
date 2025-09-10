@@ -296,7 +296,6 @@
   </style>
 </head>
 <body>
-  <div id="header"></div>
   <div class="container">
     <h1>🏆 Ranking SIPAT 2025</h1>
     <div class="subtitle">Classificação Geral dos Jogadores</div>
@@ -335,12 +334,6 @@
     const SHEET_ID = "1vdsvbUJe8Bz8PAzgEdZUNc6PieLLSOB8D-khKJa8kOo";
     const SHEET_NAME = "Consolidado";
     const JSON_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${SHEET_NAME}`;
-
-    // Importar header
-    fetch("/header.html")
-      .then(r => r.text())
-      .then(data => { document.getElementById("header").innerHTML = data; })
-      .catch(() => console.log("Header não encontrado."));
 
     async function loadRankingData() {
       document.getElementById("loading").style.display = "block";
